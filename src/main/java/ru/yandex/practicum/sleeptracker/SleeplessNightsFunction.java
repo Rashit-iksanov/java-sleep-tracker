@@ -3,7 +3,6 @@ package ru.yandex.practicum.sleeptracker;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
@@ -49,8 +48,7 @@ public class SleeplessNightsFunction implements SleepAnalysisFunction {
                 .flatMap(s -> {
                     LocalDate minDate = s.getStart().toLocalDate().minusDays(1);
                     LocalDate maxDate = s.getEnd().toLocalDate();
-                    long days = ChronoUnit.DAYS.between(minDate, maxDate) +1;
-
+                    long days = ChronoUnit.DAYS.between(minDate, maxDate) + 1;
                     return Stream.iterate(minDate, d -> d.plusDays(1))
                             .limit(days)
                             .filter(d -> {
