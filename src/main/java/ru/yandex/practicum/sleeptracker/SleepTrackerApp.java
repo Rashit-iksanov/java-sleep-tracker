@@ -19,7 +19,7 @@ public class SleepTrackerApp {
         Path filePath = Paths.get(args[0]);
 
         try (Stream<String> lines = Files.lines(filePath)) {
-            List<SleepingSession> sessions =lines
+            List<SleepingSession> sessions = lines
                     .filter(line -> !line.trim().isEmpty())
                     .map(SleepingSession::parse)
                     .collect(Collectors.toList());
