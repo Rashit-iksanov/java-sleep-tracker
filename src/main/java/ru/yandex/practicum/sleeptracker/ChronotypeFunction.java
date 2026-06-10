@@ -31,10 +31,15 @@ public class ChronotypeFunction implements SleepAnalysisFunction {
                 })
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-        long maxVal = counts.values().stream().mapToLong(Long::longValue).max().orElse(0);
+        long maxVal = counts.values().stream()
+                .mapToLong(Long::longValue)
+                .max()
+                .orElse(0L);
 
 
-        long typesWithMax = counts.values().stream().filter(v -> v == maxVal).count();
+        long typesWithMax = counts.values().stream()
+                .filter(v -> v.equals(maxVal))
+                .count();
 
         String dominant;
         if (typesWithMax > 1) {

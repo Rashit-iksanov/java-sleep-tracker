@@ -2,10 +2,12 @@ package ru.yandex.practicum.sleeptracker;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SleepTrackerApp {
     public static void main(String[] args) {
@@ -14,10 +16,10 @@ public class SleepTrackerApp {
             return;
         }
 
-        String filePath = args[0];
+        Path filePath = Paths.get(args[0]);
 
-        try {
-            List<SleepingSession> sessions = Files.lines(Paths.get(filePath))
+        try (Stream<String> lines = Files.lines(filePath)) {
+            List<SleepingSession> sessions =lines
                     .filter(line -> !line.trim().isEmpty())
                     .map(SleepingSession::parse)
                     .collect(Collectors.toList());

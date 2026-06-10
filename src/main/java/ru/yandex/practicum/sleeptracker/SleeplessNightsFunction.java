@@ -4,8 +4,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SleeplessNightsFunction implements SleepAnalysisFunction {
@@ -36,24 +39,31 @@ public class SleeplessNightsFunction implements SleepAnalysisFunction {
                 ? lastEnd.toLocalDate().plusDays(1)
                 : lastEnd.toLocalDate();
 
-        long totalNights = Period.between(startDate, endDate).getDays();
+        long totalNights = ChronoUnit.DAYS.between(startDate, endDate);
 
         if (totalNights <= 0) {
             return new SleepAnalysisResult("Количество бессонных ночей", "0");
         }
 
+        Set<LocalDate> nightsWithSleep = sessions.stream()
+                .flatMap(s -> {
+                    LocalDate minDate = s.getStart().toLocalDate().minusDays(1);
+                    LocalDate maxDate = s.getEnd().toLocalDate();
+                    long days = ChronoUnit.DAYS.between(minDate, maxDate) +1;
+
+                    return Stream.iterate(minDate, d -> d.plusDays(1))
+                            .limit(days)
+                            .filter(d -> {
+                                LocalDateTime nightCheckStart = d.plusDays(1).atStartOfDay();
+                                LocalDateTime nightCheckEnd = d.plusDays(1).atTime(6, 0);
+                                return s.getStart().isBefore(nightCheckEnd) && s.getEnd().isAfter(nightCheckStart);
+                            });
+                })
+                .collect(Collectors.toSet());
+
         long sleeplessCount = Stream.iterate(startDate, d -> d.plusDays(1))
                 .limit(totalNights)
-                .filter(d -> {
-                    LocalDateTime nightCheckStart = d.plusDays(1).atStartOfDay();
-                    LocalDateTime nightCheckEnd = d.plusDays(1).atTime(6, 0);
-
-                    boolean hasSleep = sessions.stream().anyMatch(s ->
-                            s.getStart().isBefore(nightCheckEnd) && s.getEnd().isAfter(nightCheckStart)
-                    );
-
-                    return !hasSleep;
-                })
+                .filter(d -> !nightsWithSleep.contains(d))
                 .count();
 
         return new SleepAnalysisResult("Количество бессонных ночей", String.valueOf(sleeplessCount));
